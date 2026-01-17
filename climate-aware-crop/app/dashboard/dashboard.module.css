@@ -1,0 +1,849 @@
+/**
+ * CROP STRESS DASHBOARD - PROFESSIONAL STYLING
+ * 
+ * Design System:
+ * - Google Cloud Console / Firebase Console inspired
+ * - Calm, neutral, data-first aesthetic
+ * - NO emojis, illustrations, gradients, or decorative elements
+ * - Minimal, professional appearance for agri-tech platform
+ */
+
+/* ========================================
+   CONTAINER & LAYOUT
+   ======================================== */
+
+.pageLayout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.mainContent {
+  margin-left: 260px;
+  flex: 1;
+  max-width: 1100px;
+  width: calc(100% - 260px);
+  padding: 40px 24px;
+}
+
+/* ========================================
+   SIDEBAR NAVIGATION
+   ======================================== */
+
+.logoSection {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  background-color: #1a73e8;
+  color: #ffffff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.logoText {
+  font-size: 13px;
+  font-weight: 500;
+  color: #202124;
+  line-height: 1.2;
+}
+
+.navMenu {
+  padding: 12px 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.navItem {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 8px;
+  border-radius: 6px;
+  position: relative;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 400;
+  color: #3c4043;
+  transition: background-color 0.15s ease;
+}
+
+.navItem:hover:not(.navItemActive) {
+  background-color: #f8f9fa;
+}
+
+.navItemActive {
+  background-color: #e8f0fe;
+}
+
+.navLabel {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.navIndicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: #1a73e8;
+  border-radius: 0 3px 3px 0;
+}
+
+.sidebarFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5f6368;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #202124;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  font-size: 12px;
+  color: #5f6368;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========================================
+   PAGE HEADER (SECTION 1)
+   ======================================== */
+
+.pageHeader {
+  margin-bottom: 36px;
+}
+
+.pageTitle {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  font-weight: 500;
+  color: #202124;
+  line-height: 1.2;
+}
+
+.pageSubtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+/* ========================================
+   STATUS SUMMARY BAR (SECTION 2)
+   Horizontal card with 6 items & dividers
+   ======================================== */
+
+.statusSummaryBar {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 20px 24px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.statusItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 1 auto;
+}
+
+.statusLabel {
+  font-size: 12px;
+  font-weight: 400;
+  color: #5f6368;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.statusValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: #202124;
+}
+
+.statusValueWithDot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusDivider {
+  width: 1px;
+  height: 40px;
+  background-color: #e0e0e0;
+}
+
+/* Severity dot in status bar */
+.severityDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.severityDot.severityLow {
+  background-color: #188038;
+}
+
+.severityDot.severityMedium {
+  background-color: #f29900;
+}
+
+.severityDot.severityHigh {
+  background-color: #d93025;
+}
+
+/* ========================================
+   TODAY'S ADVISORY CARD (SECTION 3)
+   Primary highlighted card with custom styling
+   ======================================== */
+
+.advisorySection {
+  margin-bottom: 24px;
+}
+
+/* LANGUAGE SELECTOR - Regional language support dropdown */
+.languageSelector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.languageSelectorLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #202124;
+  white-space: nowrap;
+}
+
+.languageSelect {
+  padding: 6px 12px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: #ffffff;
+  color: #202124;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.languageSelect:hover {
+  border-color: #1a73e8;
+}
+
+.languageSelect:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px #e8f0fe;
+}
+
+.cacheIndicator {
+  font-size: 12px;
+  color: #5f6368;
+  margin-left: auto;
+  padding-left: 12px;
+  border-left: 1px solid #e0e0e0;
+}
+
+.advisoryCard {
+  background-color: #f1f8ff;
+  border: 1px solid #d2e3fc;
+  border-left: 3px solid #1a73e8;
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.advisoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.advisoryTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #202124;
+  flex: 1;
+}
+
+.advisoryActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* VOICE ADVISORY BUTTON - Subtle, accessible design */
+.voiceButton {
+  border: 1px solid #d2e3fc;
+  background-color: #ffffff;
+  color: #1a73e8;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.voiceButton:hover:not(:disabled) {
+  background-color: #f1f8ff;
+  border-color: #1a73e8;
+}
+
+.voiceButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.voiceButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.voiceButtonActive {
+  background-color: #e8f0fe;
+  border-color: #1a73e8;
+}
+
+.voiceButtonText {
+  display: block;
+}
+
+/* WHATSAPP SHARE BUTTON - Share voice advisory via WhatsApp */
+.whatsappShareButton {
+  border: 1px solid #25d366;
+  background-color: #ffffff;
+  color: #25d366;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.whatsappShareButton:hover:not(:disabled) {
+  background-color: #f0fdf4;
+  border-color: #25d366;
+}
+
+.whatsappShareButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.whatsappShareButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.whatsappShareText {
+  display: block;
+}
+
+/* Helper text for voice advisory */
+.advisoryHelper {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #d2e3fc;
+}
+
+.helperText {
+  font-size: 12px;
+  color: #5f6368;
+  display: block;
+}
+
+.advisoryAction {
+  font-size: 16px;
+  font-weight: 500;
+  color: #202124;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.advisoryTiming {
+  font-size: 14px;
+  color: #5f6368;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.timingLabel {
+  font-weight: 500;
+  color: #202124;
+}
+
+.advisoryDivider {
+  height: 1px;
+  background-color: #d2e3fc;
+  margin: 16px 0;
+}
+
+.advisoryReason {
+  font-size: 13px;
+  color: #5f6368;
+  line-height: 1.6;
+}
+
+/* ========================================
+   BADGE STYLING
+   Confidence and status badges with colors
+   ======================================== */
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeSuccess {
+  background-color: #e6f4ea;
+  border: 1px solid #c6e1c6;
+  color: #137333;
+}
+
+/* ========================================
+   WHATSAPP ALERTS SECTION (SECTION 7)
+   Communication preferences with toggle
+   ======================================== */
+
+.whatsappAlertContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+}
+
+.whatsappAlertContent {
+  flex: 1;
+}
+
+.whatsappTitle {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #202124;
+}
+
+.whatsappDescription {
+  margin: 0;
+  font-size: 14px;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+/* TOGGLE SWITCH - Accessible, minimal design */
+.toggleWrapper {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.toggle {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  background-color: #dadce0;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toggle:focus {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+.toggleOn {
+  background-color: #34a853;
+}
+
+.toggleOff {
+  background-color: #dadce0;
+}
+
+.toggleIndicator {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: left 0.2s ease;
+  left: 2px;
+}
+
+.toggleOn .toggleIndicator {
+  left: 24px;
+}
+
+/* Enablement confirmation message */
+.enablementMessage {
+  padding: 16px 24px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+}
+
+.enablementText {
+  margin: 0;
+  font-size: 13px;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+/* ========================================
+   STANDARD SECTIONS (4, 5, 6)
+   Reusable card styling
+   ======================================== */
+
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #202124;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* ========================================
+   CROP DETAILS TABLE (SECTION 4)
+   Grid-based label/value layout
+   ======================================== */
+
+.detailsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+  padding: 12px 24px;
+  align-items: center;
+}
+
+.detailRowBorder {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.detailLabel {
+  font-size: 13px;
+  font-weight: 400;
+  color: #5f6368;
+}
+
+.detailValue {
+  font-size: 14px;
+  font-weight: 400;
+  color: #202124;
+}
+
+/* ========================================
+   STRESS HISTORY TIMELINE (SECTION 5)
+   Vertical timeline with dots and connector
+   ======================================== */
+
+.timelineContainer {
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* Custom scrollbar styling */
+.timelineContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timelineContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timelineContainer::-webkit-scrollbar-thumb {
+  background-color: #e0e0e0;
+  border-radius: 3px;
+}
+
+.timelineEvent {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 16px;
+  padding-bottom: 24px;
+}
+
+.timelineEvent:last-child {
+  padding-bottom: 0;
+}
+
+.timelineMarker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.timelineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.timelineDot.severityLow {
+  background-color: #188038;
+  box-shadow: 0 0 0 2px #188038;
+}
+
+.timelineDot.severityMedium {
+  background-color: #f29900;
+  box-shadow: 0 0 0 2px #f29900;
+}
+
+.timelineDot.severityHigh {
+  background-color: #d93025;
+  box-shadow: 0 0 0 2px #d93025;
+}
+
+.timelineLine {
+  flex: 1;
+  width: 1px;
+  background-color: #e0e0e0;
+  margin-top: 8px;
+}
+
+.timelineContent {
+  padding-top: 2px;
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+  gap: 12px;
+}
+
+.timelineDate {
+  font-size: 13px;
+  color: #5f6368;
+  font-weight: 400;
+}
+
+.timelineSeverity {
+  font-size: 12px;
+  font-weight: 400;
+  color: #5f6368;
+}
+
+.timelineSeverity.severityLow {
+  color: #188038;
+  font-weight: 500;
+}
+
+.timelineSeverity.severityMedium {
+  color: #f29900;
+  font-weight: 500;
+}
+
+.timelineSeverity.severityHigh {
+  color: #d93025;
+  font-weight: 500;
+}
+
+.timelineStressType {
+  font-size: 14px;
+  font-weight: 500;
+  color: #202124;
+  margin-bottom: 4px;
+}
+
+.timelineDescription {
+  font-size: 13px;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+/* ========================================
+   EXPLAINABILITY NOTE (SECTION 6)
+   Minimal card with explanation text
+   ======================================== */
+
+.explainabilityCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 20px 24px;
+}
+
+.explainabilityTitle {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #202124;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.explainabilityText {
+  margin: 0;
+  font-size: 13px;
+  color: #5f6368;
+  line-height: 1.6;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   Mobile optimization
+   ======================================== */
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .statusSummaryBar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .statusItem {
+    width: 100%;
+  }
+
+  .statusDivider {
+    display: none;
+  }
+
+  .detailRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 12px 16px;
+  }
+
+  .detailLabel {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .timelineContainer {
+    max-height: 360px;
+    padding: 16px;
+  }
+
+  .timelineEvent {
+    gap: 12px;
+    padding-bottom: 20px;
+  }
+
+  .explainabilityCard {
+    padding: 16px;
+  }
+
+  .advisoryCard {
+    padding: 16px;
+  }
+}

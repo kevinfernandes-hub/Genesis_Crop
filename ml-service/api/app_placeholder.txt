@@ -1,0 +1,5 @@
+"""
+Placeholder: Flask/FastAPI server
+This would contain the main API application
+"""
+# app.py - Main application

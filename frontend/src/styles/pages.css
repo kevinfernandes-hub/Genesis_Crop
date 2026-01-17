@@ -1,0 +1,154 @@
+/**
+ * Page Styles
+ * Login and Dashboard pages
+ */
+
+/* ============ LOGIN PAGE ============ */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  padding: var(--spacing-md);
+}
+
+.login-card {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card h1 {
+  text-align: center;
+  color: var(--primary-green);
+  margin-bottom: var(--spacing-sm);
+}
+
+.login-card .subtitle {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.login-card form {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.login-card button[type='submit'] {
+  width: 100%;
+  background-color: var(--primary-green);
+  color: white;
+  font-weight: 600;
+}
+
+.login-card button[type='submit']:hover {
+  background-color: var(--primary-dark);
+}
+
+.signup-link {
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
+.signup-link a {
+  color: var(--primary-green);
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* ============ DASHBOARD PAGE ============ */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background-light);
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: var(--spacing-md);
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ============ TAB NAVIGATION ============ */
+.tab-navigation {
+  display: flex;
+  border-bottom: 1px solid var(--border-light);
+  background-color: white;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab {
+  flex: 1;
+  padding: var(--spacing-md);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-light);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tab:hover {
+  color: var(--text-dark);
+  background-color: var(--background-light);
+}
+
+.tab.active {
+  color: var(--primary-green);
+  border-bottom-color: var(--primary-green);
+}
+
+/* ============ CARDS ============ */
+.crop-card,
+.stress-card,
+.notification-item {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.crop-card {
+  border-left: 4px solid var(--primary-green);
+}
+
+.stress-card {
+  text-align: center;
+  border-left: 4px solid var(--border-light);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (min-width: 768px) {
+  .dashboard-content {
+    padding: var(--spacing-xl);
+  }
+
+  .tab-navigation {
+    max-width: 400px;
+  }
+}

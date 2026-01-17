@@ -1,0 +1,129 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+}
+
+.hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-3xl) var(--space-lg);
+  text-align: center;
+}
+
+.hero h1 {
+  margin-bottom: var(--space-md);
+  color: var(--color-text-primary);
+}
+
+.hero p {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3xl);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-lg);
+  justify-content: center;
+  margin-bottom: var(--space-3xl);
+  flex-wrap: wrap;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-block;
+  padding: var(--space-lg) var(--space-2xl);
+  border-radius: 4px;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.primaryBtn {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.primaryBtn:hover {
+  background-color: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.secondaryBtn {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.secondaryBtn:hover {
+  background-color: rgba(25, 118, 210, 0.05);
+  transform: translateY(-2px);
+}
+
+.features {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-3xl) var(--space-lg);
+  text-align: center;
+}
+
+.features h2 {
+  margin-bottom: var(--space-2xl);
+  color: var(--color-text-primary);
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-2xl);
+}
+
+.featureCard {
+  background: var(--color-bg-primary);
+  padding: var(--space-2xl);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.featureCard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.featureCard h3 {
+  color: var(--color-primary);
+  margin-bottom: var(--space-md);
+}
+
+.featureCard p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: var(--space-2xl) var(--space-lg);
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    width: 100%;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+}

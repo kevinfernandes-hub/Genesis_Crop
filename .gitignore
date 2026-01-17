@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+*.egg-info/
+__pycache__/
+.Python
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Firebase
+.firebaserc
+.firebase/
+
+# Build outputs
+dist/
+build/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

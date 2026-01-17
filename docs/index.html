@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Climate-Aware Crop Stress Monitoring - Project Structure</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #764ba2;
+      margin-top: 30px;
+    }
+    .folder-tree {
+      background: #f5f5f5;
+      border-left: 3px solid #667eea;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .section {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+    }
+    .feature {
+      display: flex;
+      align-items: flex-start;
+      margin: 12px 0;
+    }
+    .feature::before {
+      content: "✓";
+      color: #27ae60;
+      font-weight: bold;
+      margin-right: 10px;
+      font-size: 16px;
+    }
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+    .tech-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .tech-box h3 {
+      margin: 0 0 10px 0;
+    }
+    .tech-box ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .tech-box li {
+      margin: 5px 0;
+    }
+    code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    .quick-start {
+      background: #e8f5e9;
+      border-left: 4px solid #27ae60;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+    }
+    .note {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌾 Climate-Aware Crop Stress Monitoring System</h1>
+    <p><strong>GDG Hackathon Project</strong> - A complete full-stack JavaScript application for real-time crop stress detection and management</p>
+
+    <h2>📋 Project Overview</h2>
+    <div class="section">
+      <p>This project structure is designed for a hackathon with:</p>
+      <div class="feature">Clean separation between frontend and backend</div>
+      <div class="feature">Scalable architecture following best practices</div>
+      <div class="feature">Firebase for authentication and database</div>
+      <div class="feature">ML service integration via API calls</div>
+      <div class="feature">Real-time notifications with FCM</div>
+      <div class="feature">Comprehensive documentation</div>
+    </div>
+
+    <h2>🛠️ Tech Stack</h2>
+    <div class="tech-stack">
+      <div class="tech-box">
+        <h3>Frontend</h3>
+        <ul>
+          <li>React 18</li>
+          <li>Vite (build tool)</li>
+          <li>React Router</li>
+          <li>Axios</li>
+          <li>Firebase SDK</li>
+          <li>Chart.js</li>
+        </ul>
+      </div>
+      <div class="tech-box">
+        <h3>Backend</h3>
+        <ul>
+          <li>Node.js</li>
+          <li>Express</li>
+          <li>Firebase Admin SDK</li>
+          <li>JWT Authentication</li>
+          <li>CORS enabled</li>
+        </ul>
+      </div>
+      <div class="tech-box">
+        <h3>Infrastructure</h3>
+        <ul>
+          <li>Firebase Auth</li>
+          <li>Firestore Database</li>
+          <li>Cloud Messaging (FCM)</li>
+          <li>Firebase Hosting</li>
+          <li>Python ML Service</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>📁 Project Structure</h2>
+    <div class="folder-tree">
+      <pre>climate-aware-crop-stress/
+├── frontend/                    # React web application
+│   ├── src/
+│   │   ├── components/          # React components
+│   │   │   ├── Auth/            # Login, SignUp, ProtectedRoute
+│   │   │   ├── Dashboard/       # Main dashboard
+│   │   │   │   └── StressVisualization/  # Maps, Charts, Alerts
+│   │   │   ├── Common/          # Header, Sidebar, Notifications
+│   │   │   └── Layout/          # MainLayout wrapper
+│   │   ├── services/            # API & external integrations
+│   │   │   ├── api.js           # Axios instance
+│   │   │   ├── authService.js   # Firebase auth
+│   │   │   ├── cropService.js   # Crop CRUD
+│   │   │   └── mlService.js     # ML predictions
+│   │   ├── config/              # Firebase config
+│   │   ├── hooks/               # Custom React hooks
+│   │   │   ├── useAuth.js       # Auth context
+│   │   │   └── useCropData.js   # Data fetching
+│   │   ├── utils/               # Helpers & constants
+│   │   ├── styles/              # Global CSS
+│   │   ├── App.jsx              # Main component
+│   │   └── main.jsx             # Entry point
+│   ├── vite.config.js           # Vite configuration
+│   ├── package.json
+│   └── README.md
+│
+├── backend/                     # Node.js + Express API
+│   ├── src/
+│   │   ├── routes/              # API endpoints
+│   │   │   ├── auth.js          # Auth routes
+│   │   │   ├── crops.js         # Crop routes
+│   │   │   ├── predictions.js   # ML prediction routes
+│   │   │   └── notifications.js # FCM routes
+│   │   ├── controllers/         # Business logic
+│   │   │   ├── authController.js
+│   │   │   ├── cropController.js
+│   │   │   ├── mlController.js
+│   │   │   └── notificationController.js
+│   │   ├── services/            # External integrations
+│   │   │   ├── mlService.js     # ML API client
+│   │   │   ├── firebaseService.js
+│   │   │   └── notificationService.js
+│   │   ├── middleware/          # Express middleware
+│   │   │   ├── auth.js          # JWT verification
+│   │   │   ├── errorHandler.js  # Error handling
+│   │   │   └── validation.js    # Request validation
+│   │   ├── config/              # Configuration
+│   │   │   ├── firebase.js      # Firebase admin setup
+│   │   │   └── env.js           # Environment vars
+│   │   ├── utils/               # Utilities
+│   │   │   ├── logger.js
+│   │   │   ├── errorHandler.js  # Custom errors
+│   │   │   └── constants.js
+│   │   └── server.js            # Express app
+│   ├── .env.example
+│   ├── package.json
+│   └── README.md
+│
+├── ml-service/                  # Python ML service (reference)
+│   ├── models/                  # Trained models
+│   ├── api/                     # Flask/FastAPI app
+│   ├── utils/                   # Preprocessing, etc
+│   ├── requirements.txt
+│   └── README.md
+│
+├── docs/                        # Project documentation
+│   ├── ARCHITECTURE.md          # System design
+│   ├── API.md                   # API endpoints
+│   └── SETUP.md                 # Setup instructions
+│
+├── .gitignore
+└── README.md                    # Main project README
+      </pre>
+    </div>
+
+    <h2>🎯 Key Features</h2>
+    <div class="section">
+      <h3>Frontend</h3>
+      <div class="feature">Protected routes with JWT authentication</div>
+      <div class="feature">Real-time crop stress visualization with maps and charts</div>
+      <div class="feature">Custom hooks for auth and data management</div>
+      <div class="feature">Centralized API service layer with error handling</div>
+      <div class="feature">Firebase Cloud Messaging integration</div>
+
+      <h3>Backend</h3>
+      <div class="feature">JWT-based authentication middleware</div>
+      <div class="feature">Firestore database integration</div>
+      <div class="feature">ML service proxy for predictions</div>
+      <div class="feature">FCM notification service</div>
+      <div class="feature">Global error handling and logging</div>
+      <div class="feature">Request validation middleware</div>
+
+      <h3>Architecture</h3>
+      <div class="feature">ML service treated as external API (no coupling)</div>
+      <div class="feature">Modular and testable code structure</div>
+      <div class="feature">Clear separation of concerns</div>
+      <div class="feature">Environment-based configuration</div>
+    </div>
+
+    <h2>🚀 Quick Start</h2>
+    <div class="quick-start">
+      <h3>Frontend Setup</h3>
+      <code>cd frontend && npm install && npm run dev</code>
+      <p>Access at <code>http://localhost:5173</code></p>
+
+      <h3>Backend Setup</h3>
+      <code>cd backend && npm install && npm run dev</code>
+      <p>Server at <code>http://localhost:5000</code></p>
+
+      <h3>ML Service Setup (Optional)</h3>
+      <code>cd ml-service && pip install -r requirements.txt && python app.py</code>
+      <p>Service at <code>http://localhost:5001</code></p>
+    </div>
+
+    <h2>📚 Documentation</h2>
+    <div class="section">
+      <ul>
+        <li><strong>docs/ARCHITECTURE.md</strong> - System design and data flow</li>
+        <li><strong>docs/API.md</strong> - Complete API endpoint documentation</li>
+        <li><strong>docs/SETUP.md</strong> - Step-by-step setup guide with Firebase</li>
+        <li><strong>frontend/README.md</strong> - Frontend structure and components</li>
+        <li><strong>backend/README.md</strong> - Backend structure and routes</li>
+        <li><strong>ml-service/README.md</strong> - ML service integration notes</li>
+      </ul>
+    </div>
+
+    <h2>⚠️ Important Notes</h2>
+    <div class="note">
+      <strong>For Hackathon:</strong>
+      <ul>
+        <li>Use Firebase free tier for quick setup</li>
+        <li>ML service can be mocked initially with static responses</li>
+        <li>Focus on frontend/backend integration first</li>
+        <li>Add ML predictions once core features work</li>
+        <li>All code is production-ready but simplified for learning</li>
+      </ul>
+    </div>
+
+    <h2>🔐 Security Checklist</h2>
+    <div class="section">
+      <div class="feature">JWT tokens for API authentication</div>
+      <div class="feature">Firebase Auth for user management</div>
+      <div class="feature">Firestore security rules by user ID</div>
+      <div class="feature">Environment variables for secrets</div>
+      <div class="feature">CORS properly configured</div>
+      <div class="feature">Error messages don't leak sensitive data</div>
+    </div>
+
+    <h2>📝 File Descriptions</h2>
+    <div class="section">
+      <h3>Frontend Entry Points</h3>
+      <ul>
+        <li><code>App.jsx</code> - Main app with routing</li>
+        <li><code>main.jsx</code> - React entry point</li>
+        <li><code>components/</code> - All React components</li>
+        <li><code>services/</code> - API and Firebase integration</li>
+        <li><code>hooks/</code> - Custom React hooks</li>
+      </ul>
+
+      <h3>Backend Entry Points</h3>
+      <ul>
+        <li><code>server.js</code> - Express app setup</li>
+        <li><code>routes/</code> - All API endpoints</li>
+        <li><code>controllers/</code> - Business logic</li>
+        <li><code>services/</code> - External service clients</li>
+        <li><code>middleware/</code> - Auth, error handling</li>
+      </ul>
+    </div>
+
+    <h2>✅ Next Steps</h2>
+    <div class="section">
+      <ol>
+        <li>Set up Firebase project and get credentials</li>
+        <li>Follow setup guide in <code>docs/SETUP.md</code></li>
+        <li>Install dependencies for frontend and backend</li>
+        <li>Configure environment variables</li>
+        <li>Run all services in parallel</li>
+        <li>Test API endpoints with Postman or similar</li>
+        <li>Implement ML service or use mocked responses</li>
+        <li>Deploy to Firebase Hosting (frontend) and Cloud Run (backend)</li>
+      </ol>
+    </div>
+
+    <hr style="margin: 30px 0; border: none; border-top: 2px solid #eee;">
+    <p style="text-align: center; color: #666;">
+      Built for GDG Hackathon 2026 | Climate-Aware Crop Stress Monitoring System
+    </p>
+  </div>
+</body>
+</html>
