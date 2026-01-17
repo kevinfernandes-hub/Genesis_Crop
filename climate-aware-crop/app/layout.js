@@ -1,4 +1,5 @@
 import './globals.css'
+import { AuthProvider } from './context/AuthContext'
 
 export const metadata = {
   title: 'Climate-Aware Crop Stress Monitoring',
@@ -9,7 +10,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

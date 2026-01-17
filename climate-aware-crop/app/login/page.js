@@ -1,106 +1,84 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../config/firebase'
 import Link from 'next/link'
 import styles from './login.module.css'
 
 export default function LoginPage() {
-  // State for phone + OTP flow
-  const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
-  const [step, setStep] = useState('phone') // 'phone' or 'otp'
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  /**
-   * Handle phone number input
-   * Only accepts digits and formats as user types
-   */
-  const handlePhoneChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '')
-    if (value.length <= 10) {
-      setPhone(value)
-      setError('')
-    }
-  }
-
-  /**
-   * Handle OTP input
-   * Only accepts digits, max 6 characters
-   */
-  const handleOtpChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '')
-    if (value.length <= 6) {
-      setOtp(value)
-      setError('')
-    }
-  }
-
-  /**
-   * Submit phone number
-   * No real API call yet - just moves to OTP step
-   */
-  const handlePhoneSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
 
-    if (phone.length < 10) {
-      setError('Please enter a valid 10-digit phone number')
+    // Basic validation
+    if (!email.trim()) {
+      setError('Please enter your email')
+      setLoading(false)
       return
     }
 
-    // Simulate sending OTP
-    setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 600))
-    setIsLoading(false)
-    setStep('otp')
-  }
-
-  /**
-   * Submit OTP
-   * No real verification yet
-   */
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-
-    if (otp.length < 6) {
-      setError('Please enter a valid 6-digit OTP')
+    if (!password) {
+      setError('Please enter your password')
+      setLoading(false)
       return
     }
 
-    // Simulate OTP verification
-    setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 600))
-    setIsLoading(false)
-    // No redirect - just clear for demo
-    setPhone('')
-    setOtp('')
-    setStep('phone')
-  }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setLoading(false)
+      return
+    }
 
-  /**
-   * Go back to phone entry
-   */
-  const handleBack = () => {
-    setStep('phone')
-    setOtp('')
-    setError('')
+    try {
+      // Sign in with Firebase
+      await signInWithEmailAndPassword(auth, email.toLowerCase().trim(), password)
+      
+      // Redirect to dashboard on success
+      router.push('/dashboard')
+    } catch (err) {
+      // Handle Firebase errors
+      if (err.code === 'auth/invalid-email') {
+        setError('Invalid email address')
+      } else if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email')
+      } else if (err.code === 'auth/wrong-password') {
+        setError('Incorrect password')
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many login attempts. Try again later')
+      } else if (err.code === 'auth/user-disabled') {
+        setError('This account has been disabled')
+      } else {
+        setError(err.message || 'Failed to sign in')
+      }
+      console.error('Sign in error:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className={styles.container}>
-      {/* Left Column - Branding & Description */}
+      {/* Left Column - Branding */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarContent}>
-          <h1 className={styles.title}>Crop Stress Monitoring</h1>
+          <h1 className={styles.title}>Crop Stress Monitor</h1>
           <p className={styles.description}>
-            Monitor real-time crop stress conditions across your fields. Make informed decisions with climate-aware insights.
+            Real-time climate-aware monitoring system for your crops. Make data-driven farming decisions.
           </p>
           <ul className={styles.featureList}>
-            <li>Real-time stress detection</li>
-            <li>Climate-aware predictions</li>
-            <li>Actionable recommendations</li>
+            <li>Monitor crop stress conditions</li>
+            <li>Climate-aware insights</li>
+            <li>Real-time alerts</li>
+            <li>Personalized recommendations</li>
           </ul>
         </div>
       </aside>
@@ -108,112 +86,63 @@ export default function LoginPage() {
       {/* Right Column - Login Form */}
       <main className={styles.main}>
         <div className={styles.card}>
-          {step === 'phone' ? (
-            // Phone Entry Step
-            <>
-              <h2 className={styles.heading}>Sign in to your account</h2>
-              <p className={styles.subheading}>
-                Enter your phone number to get started
-              </p>
+          <h2 className={styles.heading}>Farmer Login</h2>
+          <p className={styles.subheading}>
+            Enter your credentials to access your dashboard
+          </p>
 
-              {error && (
-                <div className={styles.error} role="alert">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handlePhoneSubmit} className={styles.form}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="phone" className={styles.label}>
-                    Phone Number
-                  </label>
-                  <div className={styles.inputWrapper}>
-                    <span className={styles.phonePrefix}>+91</span>
-                    <input
-                      id="phone"
-                      type="text"
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      placeholder="98765 43210"
-                      maxLength="10"
-                      disabled={isLoading}
-                      className={styles.input}
-                      aria-label="Phone number"
-                    />
-                  </div>
-                  <p className={styles.hint}>
-                    We'll send you an OTP to verify
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || phone.length < 10}
-                  className={styles.button}
-                >
-                  {isLoading ? 'Sending OTP...' : 'Send OTP'}
-                </button>
-              </form>
-            </>
-          ) : (
-            // OTP Entry Step
-            <>
-              <h2 className={styles.heading}>Verify your phone number</h2>
-              <p className={styles.subheading}>
-                We sent a code to +91 {phone.slice(0, 5)} {phone.slice(5)}
-              </p>
-
-              {error && (
-                <div className={styles.error} role="alert">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleOtpSubmit} className={styles.form}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="otp" className={styles.label}>
-                    Enter OTP
-                  </label>
-                  <input
-                    id="otp"
-                    type="text"
-                    value={otp}
-                    onChange={handleOtpChange}
-                    placeholder="000000"
-                    maxLength="6"
-                    disabled={isLoading}
-                    className={styles.input}
-                    aria-label="One-time password"
-                  />
-                  <p className={styles.hint}>
-                    6-digit code sent to your phone
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || otp.length < 6}
-                  className={styles.button}
-                >
-                  {isLoading ? 'Verifying...' : 'Verify'}
-                </button>
-              </form>
-
-              <button
-                type="button"
-                onClick={handleBack}
-                className={styles.backButton}
-              >
-                Use a different number
-              </button>
-            </>
+          {error && (
+            <div className={styles.error} role="alert">
+              {error}
+            </div>
           )}
 
-          {/* Footer Text */}
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label htmlFor="email" className={styles.label}>
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                disabled={loading}
+                className={styles.input}
+                autoComplete="email"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="password" className={styles.label}>
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                disabled={loading}
+                className={styles.input}
+                autoComplete="current-password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={styles.button}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
           <p className={styles.footer}>
-            New user?{' '}
+            Don't have an account?{' '}
             <Link href="/signup" className={styles.link}>
-              Create account
+              Create one
             </Link>
           </p>
         </div>

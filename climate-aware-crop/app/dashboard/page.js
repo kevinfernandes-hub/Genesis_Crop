@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { getWeatherData, getWeatherEmoji } from '../services/weatherService'
+import { ProtectedRoute } from '../components/ProtectedRoute'
 
-export default function DashboardPage() {
+// Set this to true to use the new professional dashboard
+const USE_PROFESSIONAL_DASHBOARD = false
+
+function DashboardContent() {
+  // If using professional dashboard, render it
+  if (USE_PROFESSIONAL_DASHBOARD) {
+    return <ProfessionalDashboard />
+  }
   const [isListeningToAdvisory, setIsListeningToAdvisory] = useState(false)
   const [isLoadingAudio, setIsLoadingAudio] = useState(false)
   const [whatsappEnabled, setWhatsappEnabled] = useState(true)
@@ -553,5 +561,13 @@ export default function DashboardPage() {
         </footer>
       </div>
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   )
 }

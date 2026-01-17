@@ -1,0 +1,52 @@
+{
+  "hosting": {
+    "site": "cropedge-a7d83",
+    "public": "out",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "**/.git/**"
+    ],
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "destination": "/api/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "/404.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css|map)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ]
+  }
+}
