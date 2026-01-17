@@ -378,7 +378,55 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* WhatsApp Alerts */}
+            {/* Data Sources Section */}
+            <section>
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '24px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#202124', margin: '0 0 20px 0' }}>Data Sources Used</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Weather Data */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ marginTop: '4px', fontSize: '18px' }}>☁️</div>
+                    <div>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: '#202124', margin: '0 0 4px 0' }}>Weather Data (Source: OpenWeather / IMD)</p>
+                      <p style={{ fontSize: '12px', color: '#5f6368', margin: '0' }}>Historical, current, and forecast weather data used for climate stress analysis.</p>
+                    </div>
+                  </div>
+                  
+                  {/* Soil & Land Data */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ marginTop: '4px', fontSize: '18px' }}>🌍</div>
+                    <div>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: '#202124', margin: '0 0 4px 0' }}>Soil & Land Data (Source: SoilGrids / Soil Health Card)</p>
+                      <p style={{ fontSize: '12px', color: '#5f6368', margin: '0' }}>Soil texture, moisture holding capacity, and pH reference data.</p>
+                    </div>
+                  </div>
+                  
+                  {/* Crop Growth Model */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ marginTop: '4px', fontSize: '18px' }}>📊</div>
+                    <div>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: '#202124', margin: '0 0 4px 0' }}>Crop Growth Model (Source: Agronomic crop-stage rules)</p>
+                      <p style={{ fontSize: '12px', color: '#5f6368', margin: '0' }}>Stage-wise crop sensitivity and threshold logic.</p>
+                    </div>
+                  </div>
+                  
+                  {/* Farmer Inputs */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ marginTop: '4px', fontSize: '18px' }}>👨‍🌾</div>
+                    <div>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: '#202124', margin: '0 0 4px 0' }}>Farmer Inputs (Source: Manual entries)</p>
+                      <p style={{ fontSize: '12px', color: '#5f6368', margin: '0' }}>Sowing date, crop observations, and field-level feedback.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e0e0e0' }}>
+                  <p style={{ fontSize: '11px', color: '#9aa0a6', fontStyle: 'italic', margin: '0' }}>
+                    All insights are generated using open datasets and farmer-provided inputs. No private data is shared.
+                  </p>
+                </div>
+              </div>
+            </section>
             <section>
               <div style={{ backgroundColor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
