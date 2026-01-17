@@ -8,8 +8,8 @@ export default function TestAuthPage() {
   const [status, setStatus] = useState({
     firebaseInitialized: false,
     authObject: false,
-    testEmail: 'farmer@test.com',
-    testPassword: 'TestPass123!',
+    testEmail: 'admin@gmail.com',
+    testPassword: '',
   })
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,18 +58,27 @@ export default function TestAuthPage() {
       <div style={{ background: '#e8f4f8', padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
         <h2>Test Login</h2>
         <p><strong>Email:</strong> {status.testEmail}</p>
-        <p><strong>Password:</strong> {status.testPassword}</p>
+        <p>
+          <strong>Password:</strong>
+          <input
+            type="password"
+            value={status.testPassword}
+            onChange={(e) => setStatus(prev => ({ ...prev, testPassword: e.target.value }))}
+            placeholder="Enter password"
+            style={{ marginLeft: '10px', padding: '5px' }}
+          />
+        </p>
         
         <button
           onClick={testLogin}
-          disabled={loading}
+          disabled={loading || !status.testPassword}
           style={{
             padding: '10px 20px',
             background: '#0066cc',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            cursor: (loading || !status.testPassword) ? 'not-allowed' : 'pointer',
             fontSize: '16px',
             marginTop: '10px'
           }}
@@ -87,23 +96,6 @@ export default function TestAuthPage() {
           border: '1px solid #ccc'
         }}>
           <p style={{ margin: 0, fontSize: '16px' }}>{result}</p>
-          {result.includes('Error') && (
-            <div style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>
-              <p><strong>Common causes:</strong></p>
-              <ul>
-                <li>Email/Password provider not enabled in Firebase Console</li>
-                <li>Test user not created in Firebase Console</li>
-                <li>User credentials don't match</li>
-              </ul>
-              <p><strong>To fix:</strong></p>
-              <ol>
-                <li>Go to Firebase Console → cropedge-a7d83</li>
-                <li>Authentication → Sign-in method</li>
-                <li>Ensure Email/Password shows as "Enabled" (green toggle)</li>
-                <li>Create test user: farmer@test.com / TestPass123!</li>
-              </ol>
-            </div>
-          )}
         </div>
       )}
 
