@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useRouter } from 'next/navigation'
 
@@ -10,92 +10,248 @@ export default function FarmerInputDashboard() {
 
   // State management
   const [formData, setFormData] = useState({
-    cropType: 'wheat',
-    soilType: 'loam',
-    sowingDate: '2025-10-06',
-    location: 'Ludhiana, Punjab',
-    season: 'summer'
+    season: 'Summer',
+    crop_type: 'Rice',
+    temperature: '',
+    rainfall: '',
+    soil_moisture: '',
+    pest_damage: ''
   })
 
-  const [autoDetectSeason, setAutoDetectSeason] = useState(false)
-  const [activityLog, setActivityLog] = useState([
-    {
-      id: 1,
-      timestamp: 'Just now',
-      message: 'Form data updated',
-      source: 'farmer_input',
-      type: 'Farmer Input'
-    },
-    {
-      id: 2,
-      timestamp: '10 mins ago',
-      message: 'Stress severity recalibrated',
-      source: 'system',
-      type: 'System'
-    },
-    {
-      id: 3,
-      timestamp: 'Dec 22, 2023',
-      message: 'Season override applied',
-      source: 'context',
-      type: 'Context'
+  const [loading, setLoading] = useState(false)
+  const [prediction, setPrediction] = useState(null)
+  const [error, setError] = useState(null)
+  const [history, setHistory] = useState([])
+
+  // Load history from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('cropPredictionHistory')
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved))
+      } catch (e) {
+        console.error('Failed to load history:', e)
+      }
     }
-  ])
+  }, [])
 
-  // Calculated values
-  const sowingDateObj = new Date(formData.sowingDate)
-  const today = new Date()
-  const daysAfterSowing = Math.floor((today - sowingDateObj) / (1000 * 60 * 60 * 24))
+  // Generate recommendations based on input values
+  const generateRecommendations = (data) => {
+    const recommendations = []
 
-  const getGrowthStage = (das) => {
-    if (das <= 20) return 'Germination'
-    if (das <= 45) return 'Vegetative (Tillering)'
-    if (das <= 75) return 'Stem Elongation'
-    if (das <= 105) return 'Flowering'
-    if (das <= 135) return 'Grain Filling'
-    return 'Maturity'
+    // Pest Damage checks
+    if (data.pest_damage > 50) {
+      recommendations.push({
+        priority: 'Critical',
+        message: `High pest damage detected (${data.pest_damage}%) - Apply pesticide immediately`,
+        icon: '🐛'
+      })
+    } else if (data.pest_damage > 25) {
+      recommendations.push({
+        priority: 'High',
+        message: `Moderate pest damage (${data.pest_damage}%) - Monitor closely and consider treatment`,
+        icon: '🐛'
+      })
+    }
+
+    // Soil Moisture checks
+    if (data.soil_moisture < 20) {
+      recommendations.push({
+        priority: 'Critical',
+        message: `Very low soil moisture (${data.soil_moisture}%) - Increase irrigation immediately`,
+        icon: '💧'
+      })
+    } else if (data.soil_moisture < 40) {
+      recommendations.push({
+        priority: 'High',
+        message: `Low soil moisture (${data.soil_moisture}%) - Plan irrigation soon`,
+        icon: '💧'
+      })
+    }
+
+    // Temperature checks
+    if (data.temperature > 45) {
+      recommendations.push({
+        priority: 'High',
+        message: `High temperature (${data.temperature}°C) - Provide shade/cooling measures`,
+        icon: '🌡️'
+      })
+    } else if (data.temperature < -10) {
+      recommendations.push({
+        priority: 'High',
+        message: `Very low temperature (${data.temperature}°C) - Protect crops from frost`,
+        icon: '❄️'
+      })
+    }
+
+    // Rainfall checks
+    if (data.rainfall > 300 && data.season === 'Monsoon') {
+      recommendations.push({
+        priority: 'High',
+        message: `High rainfall (${data.rainfall}mm) - Ensure proper drainage`,
+        icon: '🌧️'
+      })
+    } else if (data.rainfall < 10 && data.season === 'Summer') {
+      recommendations.push({
+        priority: 'Medium',
+        message: `Low rainfall (${data.rainfall}mm) - Plan supplementary irrigation`,
+        icon: '☀️'
+      })
+    }
+
+    // General seasonal recommendations
+    if (data.season === 'Monsoon' && data.soil_moisture > 80) {
+      recommendations.push({
+        priority: 'Medium',
+        message: 'Very high moisture during monsoon - Watch for waterlogging',
+        icon: '💦'
+      })
+    }
+
+    return recommendations.length > 0 ? recommendations : []
   }
 
+  // Circular Gauge Component
+  const CircularGauge = ({ percentage, stressLevel }) => {
+    const getColor = () => {
+      if (percentage < 33) return '#10b981' // Green
+      if (percentage < 66) return '#f59e0b' // Yellow
+      return '#ef4444' // Red
+    }
+
+    const circumference = 2 * Math.PI * 90
+    const offset = circumference - (percentage / 100) * circumference
+
+    return (
+      <div className="flex flex-col items-center">
+        <svg width="220" height="220" className="transform -rotate-90">
+          {/* Background circle */}
+          <circle cx="110" cy="110" r="90" fill="none" stroke="#e5e7eb" strokeWidth="12" />
+          {/* Progress circle */}
+          <circle
+            cx="110"
+            cy="110"
+            r="90"
+            fill="none"
+            stroke={getColor()}
+            strokeWidth="12"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            style={{ transition: 'all 0.3s ease' }}
+          />
+        </svg>
+        <div className="absolute text-center mt-0">
+          <p className="text-4xl font-bold text-gray-900">{percentage}%</p>
+          <p className="text-lg font-semibold text-gray-600">{stressLevel}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Validation rules - MUST BE BEFORE validateField
+  const validation = {
+    temperature: { min: -50, max: 60, unit: '°C' },
+    rainfall: { min: 0, max: 500, unit: 'mm' },
+    soil_moisture: { min: 0, max: 100, unit: '%' },
+    pest_damage: { min: 0, max: 100, unit: '%' }
+  }
+
+  // Validate input
+  const validateField = (name, value) => {
+    if (!value && value !== 0) return ''
+    const numValue = parseFloat(value)
+    const rule = validation[name]
+    if (!rule) return ''
+    
+    if (numValue < rule.min || numValue > rule.max) {
+      return `Must be between ${rule.min} and ${rule.max} ${rule.unit}`
+    }
+    return ''
+  }
+
+  // Handle form input change
   const handleFormChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-
-    // Add activity log entry
-    const actionMap = {
-      cropType: `Crop type changed to ${value}`,
-      soilType: `Soil type changed to ${value}`,
-      sowingDate: `Sowing date updated`,
-      location: `Location updated to ${value}`,
-      season: `Season changed to ${value}`
-    }
-
-    if (name === 'season') {
-      setActivityLog(prev => [{
-        id: prev.length + 1,
-        timestamp: 'Just now',
-        message: actionMap[name],
-        source: 'farmer_input',
-        type: 'Farmer Input'
-      }, ...prev])
-    }
+    setError(null)
   }
 
-  const handleUpdateMonitoring = () => {
-    setActivityLog(prev => [{
-      id: prev.length + 1,
-      timestamp: 'Just now',
-      message: 'Monitoring configuration updated',
-      source: 'farmer_input',
-      type: 'Farmer Input'
-    }, ...prev])
-  }
+  // Submit form and call ML API
+  const handlePredict = async (e) => {
+    e.preventDefault()
+    setError(null)
+    setPrediction(null)
 
-  const getActivityDotColor = (source) => {
-    switch(source) {
-      case 'farmer_input': return 'bg-blue-500'
-      case 'system': return 'bg-amber-500'
-      case 'context': return 'bg-green-500'
-      default: return 'bg-gray-500'
+    // Validate all fields
+    for (const [key, val] of Object.entries(formData)) {
+      if (key !== 'season' && key !== 'crop_type') {
+        if (!val) {
+          setError('All numerical fields are required')
+          return
+        }
+        const validationError = validateField(key, val)
+        if (validationError) {
+          setError(`${key}: ${validationError}`)
+          return
+        }
+      }
+    }
+
+    setLoading(true)
+
+    try {
+      // Call ML API
+      const response = await fetch('http://localhost:8001/api/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          season: formData.season,
+          crop_type: formData.crop_type,
+          temperature: parseFloat(formData.temperature),
+          rainfall: parseFloat(formData.rainfall),
+          soil_moisture: parseFloat(formData.soil_moisture),
+          pest_damage: parseFloat(formData.pest_damage)
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('ML service not responding on port 8001. Make sure to start it with: node start-ml.js')
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Calculate stress percentage from probabilities
+        let stressPercentage = 0
+        if (data.probabilities['Moderate Stress']) {
+          stressPercentage = data.probabilities['Moderate Stress'] * 50 + data.probabilities['Severe Stress'] * 100
+        }
+
+        const newPrediction = {
+          prediction: data.prediction,
+          confidence: data.confidence,
+          probabilities: data.probabilities,
+          stressPercentage: Math.round(stressPercentage),
+          timestamp: new Date().toISOString(),
+          formData: { ...formData }
+        }
+
+        setPrediction(newPrediction)
+
+        // Save to history (keep last 10)
+        const updatedHistory = [newPrediction, ...history].slice(0, 10)
+        setHistory(updatedHistory)
+        localStorage.setItem('cropPredictionHistory', JSON.stringify(updatedHistory))
+      } else {
+        setError(data.error || 'Prediction failed')
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -106,291 +262,336 @@ export default function FarmerInputDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         
-        {/* 1️⃣ PAGE HEADER */}
+        {/* PAGE HEADER */}
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900 mb-2">
-            Farmer-Input Dashboard
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Crop Stress Prediction
           </h1>
           <p className="text-gray-600 text-sm">
-            Configure field parameters for precise stress monitoring
+            Enter crop and weather data to predict stress levels
           </p>
         </header>
 
-        {/* 2️⃣ STATUS SUMMARY BAR */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-6 flex-wrap">
-              {/* Crop */}
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Crop</span>
-                <span className="text-sm font-medium text-gray-900 capitalize">{formData.cropType}</span>
-              </div>
-
-              {/* Growth Stage */}
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Stage</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900">{getGrowthStage(daysAfterSowing)}</span>
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Derived</span>
-                </div>
-              </div>
-
-              {/* Season */}
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Season</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900 capitalize">{formData.season}</span>
-                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Manual Override</span>
-                </div>
-              </div>
-
-              {/* Stress */}
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Stress</span>
-                <span className="text-sm font-medium text-gray-900">Moisture Stress</span>
-              </div>
-
-              {/* Severity */}
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Severity</span>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                  <span className="text-sm font-medium text-gray-900">High</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-xs text-gray-500">
-              Last updated 1m ago
-            </div>
+        {/* ERROR MESSAGE */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800 text-sm">
+              <span className="font-semibold">❌ Error:</span> {error}
+            </p>
           </div>
-        </div>
+        )}
 
-        {/* 3️⃣ PRIMARY ADVISORY CARD */}
-        <div className="bg-white border-l-4 border-l-amber-500 border border-gray-200 rounded-lg p-6 mb-6">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                Recommended Action: Optimize Irrigation Frequency
-              </h2>
-              <p className="text-sm text-gray-700">
-                During the {getGrowthStage(daysAfterSowing)} stage in {formData.season} season, 
-                {' '}{formData.cropType} grown in {formData.soilType} soil requires careful water management. 
-                Increase irrigation frequency by 20% over the next 48 hours to maintain optimal soil moisture levels 
-                and prevent yield reduction from moisture stress.
-              </p>
-            </div>
-            <button className="flex items-center gap-2 text-sm font-medium text-gray-700 border border-gray-300 rounded px-4 py-2 hover:bg-gray-50 flex-shrink-0">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-              </svg>
-              Listen
-            </button>
-          </div>
-        </div>
+        {/* MAIN FORM CARD */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">
+              Input Field Parameters
+            </h2>
 
-        {/* 4️⃣ MAIN GRID (2 Columns) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          
-          {/* LEFT COLUMN */}
-          <div className="space-y-6">
-            
-            {/* 4.1 FIELD CONFIGURATION CARD */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-semibold text-gray-900">Field Configuration</h3>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={autoDetectSeason}
-                    onChange={(e) => setAutoDetectSeason(e.target.checked)}
-                    className="w-4 h-4 border-gray-300 rounded text-blue-600"
-                  />
-                  <span className="text-xs text-gray-600">Auto-detect Season</span>
-                </label>
-              </div>
-
-              <div className="space-y-4">
-                {/* Crop Type */}
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Crop Type</label>
-                  <select
-                    name="cropType"
-                    value={formData.cropType}
-                    onChange={handleFormChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="wheat">Wheat</option>
-                    <option value="rice">Rice</option>
-                    <option value="maize">Maize</option>
-                    <option value="cotton">Cotton</option>
-                  </select>
-                </div>
-
-                {/* Soil Type */}
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Soil Type</label>
-                  <select
-                    name="soilType"
-                    value={formData.soilType}
-                    onChange={handleFormChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="clay">Clay</option>
-                    <option value="sandy_loam">Sandy Loam</option>
-                    <option value="loam">Loam</option>
-                    <option value="sandy">Sandy</option>
-                  </select>
-                </div>
-
-                {/* Sowing Date */}
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Sowing Date</label>
-                  <input
-                    type="date"
-                    name="sowingDate"
-                    value={formData.sowingDate}
-                    onChange={handleFormChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Location */}
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">Location</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleFormChange}
-                    placeholder="Village / Plot ID"
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
+            <form onSubmit={handlePredict} className="space-y-6">
+              
+              {/* ROW 1: Season & Crop Type */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
                 {/* Season */}
                 <div>
-                  <label className="block text-sm text-gray-700 mb-1">Current Season</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Season <span className="text-red-500">*</span>
+                  </label>
                   <select
                     name="season"
                     value={formData.season}
                     onChange={handleFormChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="monsoon">Monsoon</option>
-                    <option value="winter">Winter</option>
-                    <option value="summer">Summer</option>
+                    <option value="Summer">Summer</option>
+                    <option value="Winter">Winter</option>
+                    <option value="Monsoon">Monsoon</option>
                   </select>
                 </div>
 
+                {/* Crop Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Crop Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="crop_type"
+                    value={formData.crop_type}
+                    onChange={handleFormChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Rice">Rice</option>
+                    <option value="Wheat">Wheat</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* ROW 2: Temperature & Rainfall */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Temperature */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Temperature <span className="text-red-500">*</span>
+                    <span className="text-gray-500 font-normal"> (-50°C to 60°C)</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="temperature"
+                    value={formData.temperature}
+                    onChange={handleFormChange}
+                    placeholder="e.g., 25"
+                    step="0.1"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Rainfall */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rainfall <span className="text-red-500">*</span>
+                    <span className="text-gray-500 font-normal"> (0-500 mm)</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="rainfall"
+                    value={formData.rainfall}
+                    onChange={handleFormChange}
+                    placeholder="e.g., 20"
+                    step="0.1"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* ROW 3: Soil Moisture & Pest Damage */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Soil Moisture */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Soil Moisture <span className="text-red-500">*</span>
+                    <span className="text-gray-500 font-normal"> (0-100%)</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="soil_moisture"
+                    value={formData.soil_moisture}
+                    onChange={handleFormChange}
+                    placeholder="e.g., 40"
+                    step="0.1"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Pest Damage */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Pest Damage <span className="text-red-500">*</span>
+                    <span className="text-gray-500 font-normal"> (0-100%)</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="pest_damage"
+                    value={formData.pest_damage}
+                    onChange={handleFormChange}
+                    placeholder="e.g., 20"
+                    step="0.1"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* SUBMIT BUTTON */}
+              <div className="pt-4">
                 <button
-                  onClick={handleUpdateMonitoring}
-                  className="w-full mt-4 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-700"
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all flex items-center justify-center gap-2 ${
+                    loading
+                      ? 'bg-blue-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                  }`}
                 >
-                  Update Monitoring
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Predicting...
+                    </>
+                  ) : (
+                    <>
+                      🔮 Predict Stress Level
+                    </>
+                  )}
                 </button>
               </div>
-            </div>
-
-            {/* 4.2 CALCULATED METRICS */}
-            <div className="space-y-3">
-              {/* Days After Sowing */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Days After Sowing</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-gray-900">{daysAfterSowing} Days</span>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Calculated</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Growth Stage */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Growth Stage</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-gray-900">{getGrowthStage(daysAfterSowing)}</span>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Calculated</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 4.3 LOCATION WEATHER CARD */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Location Weather</h3>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-2xl font-semibold text-gray-900">32°C</div>
-                  <div className="text-sm text-gray-600">{formData.location}</div>
-                </div>
-              </div>
-            </div>
+            </form>
           </div>
+        </div>
 
-          {/* RIGHT COLUMN */}
-          <div className="space-y-6">
+        {/* PREDICTION RESULT CARD */}
+        {prediction && (
+          <div className="mt-8 space-y-6">
             
-            {/* 5.1 ACTIVITY LOG */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Activity Log</h3>
-              <div className="space-y-4">
-                {activityLog.slice(0, 5).map((log, idx) => (
-                  <div key={log.id} className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-2 h-2 rounded-full ${getActivityDotColor(log.source)}`}></div>
-                      {idx < activityLog.length - 1 && (
-                        <div className="w-px h-12 bg-gray-200"></div>
-                      )}
-                    </div>
-                    <div className="flex-1 pb-4">
-                      <div className="text-xs text-gray-500 mb-1">{log.timestamp}</div>
-                      <div className="text-sm text-gray-900 mb-1">{log.message}</div>
-                      <div className="text-xs text-gray-600">
-                        Source: {log.type}
+            {/* CIRCULAR GAUGE - RISK METER */}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">
+                🎯 Crop Stress Risk Meter
+              </h3>
+              <div className="flex justify-center mb-4">
+                <div className="relative w-64 h-64">
+                  <CircularGauge 
+                    percentage={prediction.stressPercentage} 
+                    stressLevel={prediction.prediction}
+                  />
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-2">Confidence Score</p>
+                <p className="text-2xl font-bold text-blue-600">{(prediction.confidence * 100).toFixed(1)}%</p>
+              </div>
+            </div>
+
+            {/* RECOMMENDATIONS SECTION */}
+            {generateRecommendations(prediction.formData).length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  💡 Recommendations
+                </h3>
+                <div className="space-y-3">
+                  {generateRecommendations(prediction.formData).map((rec, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-4 rounded-lg border-l-4 ${
+                        rec.priority === 'Critical'
+                          ? 'bg-red-50 border-red-400'
+                          : rec.priority === 'High'
+                          ? 'bg-yellow-50 border-yellow-400'
+                          : 'bg-blue-50 border-blue-400'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl mt-1">{rec.icon}</span>
+                        <div className="flex-1">
+                          <p className={`font-semibold text-sm ${
+                            rec.priority === 'Critical'
+                              ? 'text-red-900'
+                              : rec.priority === 'High'
+                              ? 'text-yellow-900'
+                              : 'text-blue-900'
+                          }`}>
+                            {rec.priority} Priority
+                          </p>
+                          <p className={`text-sm mt-1 ${
+                            rec.priority === 'Critical'
+                              ? 'text-red-800'
+                              : rec.priority === 'High'
+                              ? 'text-yellow-800'
+                              : 'text-blue-800'
+                          }`}>
+                            {rec.message}
+                          </p>
+                        </div>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PROBABILITY BREAKDOWN */}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                📊 Probability Breakdown
+              </h3>
+              <div className="space-y-4">
+                {prediction.probabilities && Object.entries(prediction.probabilities).map(([label, prob]) => (
+                  <div key={label}>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700">{label}</span>
+                      <span className="text-sm font-bold text-gray-900">{(prob * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div
+                        className={`h-3 rounded-full ${
+                          label === 'Healthy' ? 'bg-green-500' :
+                          label === 'Moderate Stress' ? 'bg-yellow-500' :
+                          'bg-red-500'
+                        }`}
+                        style={{ width: `${prob * 100}%` }}
+                      ></div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
+        )}
 
-            {/* 6️⃣ EXPLAINABILITY CARD */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Why this alert was generated
-              </h3>
-              <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                Current weather deviation of +3.5°C above seasonal average, combined with 
-                your {formData.soilType} soil moisture retention characteristics, indicates 
-                elevated evapotranspiration. During the {getGrowthStage(daysAfterSowing).toLowerCase()} stage, 
-                {' '}{formData.cropType} requires consistent soil moisture. Satellite thermal 
-                imagery suggests 12% deviation from expected thermal time accumulation.
-              </p>
-              
-              <div className="space-y-2 border-t border-gray-200 pt-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Season Context</span>
-                  <span className="font-medium text-gray-900 capitalize">
-                    {formData.season} (Manual Override)
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Logic Confidence</span>
-                  <span className="font-medium text-gray-900">94% (Input-driven)</span>
-                </div>
-              </div>
+        {/* PREDICTION HISTORY TIMELINE */}
+        {history.length > 0 && (
+          <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              📈 Prediction History (Last {history.length})
+            </h3>
+            <div className="space-y-2">
+              {history.map((pred, idx) => {
+                const date = new Date(pred.timestamp)
+                const timeStr = date.toLocaleString()
+                const getHistoryColor = (level) => {
+                  if (level === 'Healthy') return 'bg-green-100 text-green-800 border-green-300'
+                  if (level === 'Moderate Stress') return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                  return 'bg-red-100 text-red-800 border-red-300'
+                }
+
+                return (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-lg border flex items-center justify-between ${getHistoryColor(pred.prediction)}`}
+                  >
+                    <div>
+                      <p className="font-semibold text-sm">{pred.prediction}</p>
+                      <p className="text-xs opacity-75">{timeStr}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-lg">{pred.stressPercentage}%</p>
+                      <p className="text-xs opacity-75">{(pred.confidence * 100).toFixed(0)}% confidence</p>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
+        )}
+
+        {/* INFO CARD */}
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-blue-900 mb-2">
+            💡 How to use this form:
+          </h3>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>✓ Select the current season and crop type</li>
+            <li>✓ Enter weather and field conditions within the valid ranges</li>
+            <li>✓ Click "Predict Stress Level" to get the AI prediction</li>
+            <li>✓ The ML model will return: Healthy, Moderate Stress, or Severe Stress</li>
+          </ul>
         </div>
+
+        {/* DEBUG: Show form data being sent */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-8 bg-gray-100 border border-gray-300 rounded-lg p-4">
+            <details className="text-xs text-gray-600">
+              <summary className="cursor-pointer font-semibold mb-2">Debug: Form Data</summary>
+              <pre className="overflow-auto">{JSON.stringify(formData, null, 2)}</pre>
+            </details>
+          </div>
+        )}
       </div>
     </div>
   )

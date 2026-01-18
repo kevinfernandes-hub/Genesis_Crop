@@ -2,13 +2,14 @@
 FastAPI Application for Crop Stress Prediction
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
-from datetime import datetime
-
-from src.stress_predictor import CropStressPredictor
+from pydantic import BaseModel
+import pandas as pd
+import numpy as np
+import os
+import json
+from xgboost import XGBClassifier
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -26,144 +27,132 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize predictor
-predictor = CropStressPredictor()
+# Paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, 'models')
+MODEL_PATH = os.path.join(MODELS_DIR, 'crop_stress_model.json')
+TRAIN_DATA_PATH = os.path.join(MODELS_DIR, 'X_train.csv')
+FEATURES_PATH = os.path.join(MODELS_DIR, 'feature_columns.json')
 
+# Load model
+try:
+    best_model = XGBClassifier()
+    best_model.load_model(MODEL_PATH)
+    print("✅ Model loaded successfully")
+except Exception as e:
+    print(f"❌ Error loading model: {e}")
+    best_model = None
 
-# Request models
-class WeatherData(BaseModel):
-    avg_temp: float = Field(..., description="Average temperature (°C)")
-    rainfall: float = Field(0.0, description="Recent rainfall (mm)")
-    rolling_7day_rainfall: float = Field(0.0, description="7-day cumulative rainfall (mm)")
-    consecutive_dry_days: int = Field(0, description="Number of consecutive dry days")
-    temp_deviation_from_normal: float = Field(0.0, description="Temperature deviation from normal (°C)")
+# Load training data
+try:
+    X_train = pd.read_csv(TRAIN_DATA_PATH)
+    print("✅ Training data loaded")
+except Exception as e:
+    print(f"❌ Error loading training data: {e}")
+    X_train = None
 
+# Load feature columns
+try:
+    with open(FEATURES_PATH, 'r') as f:
+        X_cols = json.load(f)
+    print("✅ Feature columns loaded")
+except Exception as e:
+    print(f"❌ Error loading features: {e}")
+    X_cols = None
 
-class StressPredictionRequest(BaseModel):
-    crop_type: str = Field(..., description="Type of crop (wheat, rice, maize, cotton)")
-    sowing_date: str = Field(..., description="Sowing date (YYYY-MM-DD)")
-    soil_type: str = Field(..., description="Soil type (clay, loam, sandy, etc.)")
-    season: str = Field(..., description="Current season (monsoon, winter, summer)")
-    weather: WeatherData = Field(..., description="Weather data")
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "crop_type": "wheat",
-                "sowing_date": "2025-11-15",
-                "soil_type": "loam",
-                "season": "winter",
-                "weather": {
-                    "avg_temp": 28.5,
-                    "rainfall": 5.0,
-                    "rolling_7day_rainfall": 15.0,
-                    "consecutive_dry_days": 8,
-                    "temp_deviation_from_normal": 3.5
-                }
+# Stress mapping
+STRESS_MAP = {0: "Healthy", 1: "Moderate Stress", 2: "Severe Stress"}
+
+# Request model
+class PredictionRequest(BaseModel):
+    season: str
+    crop_type: str
+    temperature: float
+    rainfall: float
+    soil_moisture: float
+    pest_damage: float
+
+@app.get('/')
+def root():
+    """Root endpoint"""
+    return {"message": "Crop Stress API is running"}
+
+@app.post('/api/predict')
+def predict(request_data: PredictionRequest):
+    """API endpoint for crop stress prediction"""
+    try:
+        if best_model is None or X_train is None or X_cols is None:
+            return {'success': False, 'error': 'Model not loaded'}
+        
+        # Create baseline with average values
+        baseline = X_train.mean().to_dict()
+        
+        # Parse user input
+        user_season = request_data.season
+        user_crop = request_data.crop_type
+        user_temp = float(request_data.temperature)
+        user_rainfall = float(request_data.rainfall)
+        user_moisture = float(request_data.soil_moisture)
+        user_pest_damage = float(request_data.pest_damage)
+        
+        # Reset categorical flags
+        for col in X_cols:
+            if "Season_" in col or "Crop_Type_" in col:
+                baseline[col] = 0
+        
+        # Set user-selected flags
+        season_col = f"Season_{user_season}"
+        crop_col = f"Crop_Type_{user_crop}"
+        
+        if season_col in baseline:
+            baseline[season_col] = 1
+        if crop_col in baseline:
+            baseline[crop_col] = 1
+        
+        # Update numerical values
+        baseline['T2M'] = user_temp
+        baseline['Rainfall'] = user_rainfall
+        baseline['Soil_Moisture'] = user_moisture
+        baseline['Pest_Damage'] = user_pest_damage
+        
+        # Recalculate interaction features
+        baseline['pest_damage_x_moisture'] = baseline['Pest_Damage'] * baseline['Soil_Moisture']
+        baseline['pest_damage_x_temp_deviation'] = baseline['Pest_Damage'] * baseline.get('temp_deviation_from_normal', 0)
+        baseline['pest_hotspots_x_rainfall'] = baseline.get('Pest_Hotspots', 0) * baseline['Rainfall']
+        
+        # Make prediction
+        live_data = pd.DataFrame([baseline])[X_cols]
+        prediction_code = best_model.predict(live_data)[0]
+        prediction_text = STRESS_MAP[int(prediction_code)]
+        
+        # Get confidence scores
+        proba = best_model.predict_proba(live_data)[0]
+        confidence = float(np.max(proba)) * 100
+        
+        return {
+            'success': True,
+            'prediction': prediction_text,
+            'confidence': round(confidence, 2),
+            'probabilities': {
+                'Healthy': round(float(proba[0]) * 100, 2),
+                'Moderate Stress': round(float(proba[1]) * 100, 2),
+                'Severe Stress': round(float(proba[2]) * 100, 2)
             }
         }
+        
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
 
-
-# Response models
-class StressPredictionResponse(BaseModel):
-    stress_type: str
-    severity: str
-    severity_color: str
-    confidence: float
-    advisory: str
-    explanation: str
-    metadata: Dict[str, Any]
-
-
-# Endpoints
-@app.get("/")
-def root():
-    """Root endpoint - API info"""
-    return {
-        "service": "Crop Stress Monitoring API",
-        "version": "1.0.0",
-        "status": "operational",
-        "endpoints": {
-            "health": "/health",
-            "predict": "/api/predict",
-            "batch_predict": "/api/batch-predict"
-        }
-    }
-
-
-@app.get("/health")
-def health_check():
+@app.get('/api/health')
+def health():
     """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
-        "model_loaded": predictor.ml_model.model is not None
-    }
+    return {'status': 'ok', 'model_loaded': best_model is not None}
 
-
-@app.post("/api/predict", response_model=StressPredictionResponse)
-def predict_stress(request: StressPredictionRequest):
-    """
-    Predict crop stress from input data
-    
-    Args:
-        request: Crop and weather data
-    
-    Returns:
-        Stress prediction with advisory and explanation
-    """
-    try:
-        # Convert request to dict
-        input_data = request.model_dump()
-        
-        # Run prediction
-        result = predictor.predict(input_data)
-        
-        return result
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
-
-
-@app.post("/api/batch-predict")
-def batch_predict_stress(requests: list[StressPredictionRequest]):
-    """
-    Predict stress for multiple crops
-    
-    Args:
-        requests: List of crop and weather data
-    
-    Returns:
-        List of stress predictions
-    """
-    try:
-        # Convert requests to dicts
-        input_batch = [req.model_dump() for req in requests]
-        
-        # Run batch prediction
-        results = predictor.batch_predict(input_batch)
-        
-        return {"predictions": results}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Batch prediction error: {str(e)}")
-
-
-@app.get("/api/model/info")
-def model_info():
-    """Get model information"""
-    feature_importance = predictor.ml_model.get_feature_importance()
-    
-    return {
-        "model_type": "Random Forest Classifier",
-        "n_estimators": 50,
-        "max_depth": 10,
-        "features": list(feature_importance.keys()),
-        "feature_importance": feature_importance,
-        "stress_types": ["moisture_stress", "heat_stress", "waterlogging", "no_stress"]
-    }
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    print("\n" + "="*50)
+    print("🌾 Crop Stress Classification API")
+    print("="*50)
+    print(f"📍 Server running at http://localhost:8001")
+    print("="*50 + "\n")
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host='0.0.0.0', port=8001)
