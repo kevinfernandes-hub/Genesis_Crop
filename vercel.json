@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "climate-aware-crop/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "climate-aware-crop/$1"
+    }
+  ]
+}
