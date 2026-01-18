@@ -1,6 +1,0 @@
-"""
-Placeholder: ML model files
-In production, these would be trained ML models (pickle, ONNX, etc.)
-"""
-# stress_model.pkl
-# health_model.pkl
